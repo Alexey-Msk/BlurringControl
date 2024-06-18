@@ -3,13 +3,23 @@ class BlurringControl
 {
     /** Контейнер, в котором располагаются миниатюры изображений. */
     static containerElement;
+
     /**
      * Функция, вызываемая после изменения свойства overlayOn.
      * @type Function
      */
     static overlayChangeCallback = null;
+
+    /** Используемые идентификаторы DOM-элементов. */
+    static elementIDs = Object.seal({
+        main: "blurOverlay",
+        range: "blurRangeOverlay"
+    });
+
     static #overlayOn = false;
-    static #bindedRangeInput = null;
+    static #overlayElement = null;
+    static #rangeElement = null;
+    static #bindedRangeElement = null;
     static #tempVisibleThumb;
     static #preventDefaultActions;
 
@@ -21,9 +31,9 @@ class BlurringControl
     static set overlayOn(value)
     {
         this.#overlayOn = value;
-        if (!document.getElementById("blurOverlay"))
+        if (!this.#overlayElement)
             this.#createOverlay();
-        blurOverlay.hidden = !this.#overlayOn;
+        this.#overlayElement.hidden = !this.#overlayOn;
         if (this.overlayChangeCallback)
             this.overlayChangeCallback();
     }
@@ -31,6 +41,24 @@ class BlurringControl
     static get overlayOn()
     {
         return this.#overlayOn;
+    }
+
+    /**
+     * Возвращает DOM-элемент окошка управления размытием.
+     * @returns {HTMLDivElement?}
+     */
+    static get overlayElement()
+    {
+        return this.#overlayElement;
+    }
+
+    /**
+     * Возвращает DOM-элемент ползунка управления размытием.
+     * @returns {HTMLInputElement?}
+     */
+    static get rangeElement()
+    {
+        return this.#rangeElement;
     }
 
 
@@ -59,7 +87,7 @@ class BlurringControl
         this.containerElement.removeEventListener('click', this.#thumbPreventDefaultHandler)
         this.containerElement.removeEventListener('dragstart', this.#thumbPreventDefaultHandler);
 
-        document.querySelector("#blurOverlay")?.remove();
+        this.#overlayElement?.remove();
         this.containerElement.style = "";
         this.containerElement.classList.remove("blur");
     }
@@ -70,44 +98,46 @@ class BlurringControl
      */
     static bind(rangeInput)
     {
-        if (this.#bindedRangeInput)
+        if (this.#bindedRangeElement)
             this.unbind();
-        else if (!document.getElementById("blurOverlay")) {
+        else if (!this.#overlayElement) {
             this.#createOverlay();
             if (this.overlayChangeCallback)
                 this.overlayChangeCallback();
         }
             
-        this.#bindedRangeInput = rangeInput;
-        rangeInput.addEventListener("change", this.#handleBindedRangeInputChange);
+        this.#bindedRangeElement = rangeInput;
+        rangeInput.addEventListener("change", this.#handleBindedRangeElementChange);
     }
 
      /** Отвязывает внешний переключатель размытия. */
     static unbind()
     {
-        if (!this.#bindedRangeInput) return;
-        this.#bindedRangeInput.removeEventListener("change", this.#handleBindedRangeInputChange);
-        this.#bindedRangeInput = null;
+        if (!this.#bindedRangeElement) return;
+        this.#bindedRangeElement.removeEventListener("change", this.#handleBindedRangeElementChange);
+        this.#bindedRangeElement = null;
     }
 
 
     static #createOverlay()
     {
         document.body.insertAdjacentHTML("beforeend", `
-            <div id="blurOverlay" style="text-align: center;">
-                <label for="blurRangeOverlay">Размытие:</label><br>
-                <input id="blurRangeOverlay" type="range" max="10" value="0" style="width: 80px;">
+            <div id="${this.elementIDs.main}" style="text-align: center;">
+                <label for="${this.elementIDs.range}">Размытие:</label><br>
+                <input id="${this.elementIDs.range}" type="range" max="10" value="0" style="width: 80px;">
             </div>`);
-        blurRangeOverlay.onchange = event => {
-            if (this.#bindedRangeInput)
-                this.#bindedRangeInput.value = blurRangeOverlay.value;
+        this.#overlayElement = document.getElementById(this.elementIDs.main);
+        this.#rangeElement = document.getElementById(this.elementIDs.range);
+        this.#rangeElement.onchange = event => {
+            if (this.#bindedRangeElement)
+                this.#bindedRangeElement.value = this.#rangeElement.value;
             this.#updateBlurring();
         };
     }
 
     static #updateBlurring()
     {
-        const blurValue = blurRangeOverlay.value;
+        const blurValue = this.#rangeElement.value;
         this.containerElement.style = `--blur: blur(${blurValue}px);`;
         this.containerElement.classList.toggle("blur", blurValue != 0);
     }
@@ -148,9 +178,9 @@ class BlurringControl
             e.preventDefault();
     }
 
-    static #handleBindedRangeInputChange(e)
+    static #handleBindedRangeElementChange(e)
     {
-        blurRangeOverlay.value = BlurringControl.#bindedRangeInput.value;
+        BlurringControl.#rangeElement.value = BlurringControl.#bindedRangeElement.value;
         BlurringControl.#updateBlurring();
     }
 }

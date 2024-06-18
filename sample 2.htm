@@ -40,7 +40,7 @@
             BlurringControl.enable();
 
             const updateBlurOverlay = function () {
-                document.querySelector("#blurOverlay").hidden = !BlurringControl.overlayOn || topNav.getBoundingClientRect().bottom > 0;
+                BlurringControl.overlayElement.hidden = !BlurringControl.overlayOn || topNav.getBoundingClientRect().bottom > 0;
             };
 
             BlurringControl.overlayChangeCallback = updateBlurOverlay;
