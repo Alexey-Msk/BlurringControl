@@ -61,6 +61,29 @@ class BlurringControl
         return this.#rangeElement;
     }
 
+    /**
+     * Задает или возвращает текущее значение размытия.
+     * @param {number} value
+     */
+    static set value(value)
+    {
+        if (!this.#rangeElement) {
+            if (value == 0) return;
+            this.#createOverlay();
+            if (this.overlayChangeCallback)
+                this.overlayChangeCallback();
+        }
+        this.#rangeElement.value = value;
+        if (this.#bindedRangeElement)
+            this.#bindedRangeElement.value = value;
+        this.#updateBlurring();
+    }
+
+    static get value()
+    {
+        return this.#rangeElement ? this.#rangeElement.value : 0;
+    }
+
 
     /**
      * Активирует управление размытием на текущей странице.
