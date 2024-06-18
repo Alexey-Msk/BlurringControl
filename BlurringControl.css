@@ -1,0 +1,16 @@
+#blurOverlay {
+	color: white;
+	background-color: rgba(0, 0, 0, 0.5);
+	border: 1px solid black;
+	border-radius: 4px;
+	box-shadow: 0 0 7px black;
+	position: fixed;
+	z-index: 9999;
+	top: 20px;
+	right: 20px;
+	padding: 4px;
+}
+
+.blur .thumb:not(.blacklisted):not(.tempShow) img {
+	filter: var(--blur);
+}
