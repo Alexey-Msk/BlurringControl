@@ -1,5 +1,7 @@
+/** Элемент управления размытием миниатюр изображений. */
 class BlurringControl
 {
+    /** Контейнер, в котором располагаются миниатюры изображений. */
     static containerElement;
     /**
      * Функция, вызываемая после изменения свойства overlayOn.
@@ -32,6 +34,7 @@ class BlurringControl
     }
 
 
+    /** Активирует управление размытием на текущей странице. */
     static enable()
     {
         this.containerElement ??= document.body;
@@ -42,6 +45,7 @@ class BlurringControl
         this.containerElement.addEventListener('dragstart', this.#thumbPreventDefaultHandler);
     }
 
+    /** Деактивирует управление размытием на текущей странице. */
     static disable()
     {
         document.removeEventListener("keydown", this.#handleKeyDown);
@@ -141,7 +145,6 @@ class BlurringControl
 
     static #handleBindedRangeInputChange(e)
     {
-        console.log(BlurringControl.#bindedRangeInput.value);
         blurRangeOverlay.value = BlurringControl.#bindedRangeInput.value;
         BlurringControl.#updateBlurring();
     }
