@@ -34,11 +34,16 @@ class BlurringControl
     }
 
 
-    /** Активирует управление размытием на текущей странице. */
-    static enable()
+    /**
+     * Активирует управление размытием на текущей странице.
+     * @param {boolean} allowTempShow При значении true позволяет временно убирать размытие с миниатюры
+     * при нажатии ЛКМ с зажатой клавишей Ctrl.
+     */
+    static enable(allowTempShow = true)
     {
         this.containerElement ??= document.body;
         document.addEventListener("keydown", this.#handleKeyDown);
+        if (!allowTempShow) return;
         this.containerElement.addEventListener("mousedown", this.#handleMouseDown);
         document.addEventListener('mouseup', this.#handleMouseUp);
         this.containerElement.addEventListener('click', this.#thumbPreventDefaultHandler)
