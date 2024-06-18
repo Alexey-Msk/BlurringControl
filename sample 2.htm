@@ -44,6 +44,8 @@
             };
 
             BlurringControl.overlayChangeCallback = updateBlurOverlay;
+            BlurringControl.bind(blurRange);
+            BlurringControl.overlayOn = true;
 
             window.addEventListener("scroll", e => {
                 if (document.querySelector("#blurOverlay"))

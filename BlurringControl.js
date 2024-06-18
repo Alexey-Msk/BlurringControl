@@ -1,9 +1,13 @@
 class BlurringControl
 {
     static containerElement;
-    /** Функция, вызываемая после изменения свойства overlayOn. */
+    /**
+     * Функция, вызываемая после изменения свойства overlayOn.
+     * @type Function
+     */
     static overlayChangeCallback = null;
     static #overlayOn = false;
+    static #bindedRangeInput = null;
     static #tempVisibleThumb;
     static #preventDefaultActions;
 
@@ -15,18 +19,8 @@ class BlurringControl
     static set overlayOn(value)
     {
         this.#overlayOn = value;
-        if (!document.getElementById("blurOverlay")) {
-            document.body.insertAdjacentHTML("beforeend", `
-                <div id="blurOverlay" style="text-align: center;">
-                    <label for="blurRangeOverlay">Размытие:</label><br>
-                    <input id="blurRangeOverlay" type="range" max="10" value="0" style="width: 80px;">
-                </div>`);
-            blurRangeOverlay.onchange = event => {
-                const blurValue = blurRangeOverlay.value;
-                BlurringControl.containerElement.style = `--blur: blur(${blurValue}px);`;
-                BlurringControl.containerElement.classList.toggle("blur", blurValue != 0)
-            }
-        }
+        if (!document.getElementById("blurOverlay"))
+            this.#createOverlay();
         blurOverlay.hidden = !this.#overlayOn;
         if (this.overlayChangeCallback)
             this.overlayChangeCallback();
@@ -59,6 +53,54 @@ class BlurringControl
         document.querySelector("#blurOverlay")?.remove();
         this.containerElement.style = "";
         this.containerElement.classList.remove("blur");
+    }
+
+    /**
+     * Привязывает внешний переключатель размытия.
+     * @param {HTMLInputElement} rangeInput 
+     */
+    static bind(rangeInput)
+    {
+        if (this.#bindedRangeInput)
+            this.unbind();
+        else if (!document.getElementById("blurOverlay")) {
+            this.#createOverlay();
+            if (this.overlayChangeCallback)
+                this.overlayChangeCallback();
+        }
+            
+        this.#bindedRangeInput = rangeInput;
+        rangeInput.addEventListener("change", this.#handleBindedRangeInputChange);
+    }
+
+     /** Отвязывает внешний переключатель размытия. */
+    static unbind()
+    {
+        if (!this.#bindedRangeInput) return;
+        this.#bindedRangeInput.removeEventListener("change", this.#handleBindedRangeInputChange);
+        this.#bindedRangeInput = null;
+    }
+
+
+    static #createOverlay()
+    {
+        document.body.insertAdjacentHTML("beforeend", `
+            <div id="blurOverlay" style="text-align: center;">
+                <label for="blurRangeOverlay">Размытие:</label><br>
+                <input id="blurRangeOverlay" type="range" max="10" value="0" style="width: 80px;">
+            </div>`);
+        blurRangeOverlay.onchange = event => {
+            if (this.#bindedRangeInput)
+                this.#bindedRangeInput.value = blurRangeOverlay.value;
+            this.#updateBlurring();
+        };
+    }
+
+    static #updateBlurring()
+    {
+        const blurValue = blurRangeOverlay.value;
+        this.containerElement.style = `--blur: blur(${blurValue}px);`;
+        this.containerElement.classList.toggle("blur", blurValue != 0);
     }
 
     static #handleKeyDown(e)
@@ -95,5 +137,12 @@ class BlurringControl
     {
         if (BlurringControl.#preventDefaultActions)
             e.preventDefault();
-    }  
+    }
+
+    static #handleBindedRangeInputChange(e)
+    {
+        console.log(BlurringControl.#bindedRangeInput.value);
+        blurRangeOverlay.value = BlurringControl.#bindedRangeInput.value;
+        BlurringControl.#updateBlurring();
+    }
 }
