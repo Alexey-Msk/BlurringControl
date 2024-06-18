@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <script type="text/javascript" src="BlurringControl.js"></script>
+        <link rel="stylesheet" type="text/css" href="BlurringControl.css" media="all">
+        <style type="text/css">
+            nav {
+                background-color: #ddd;
+                padding: 5px;
+                margin-bottom: 5px;
+                display: flex;
+                justify-content: right;
+                align-items: center;
+                font-size: 11pt;
+            }
+
+            .thumb {
+                display: inline-block;
+            }
+
+            .thumb img {
+                max-width: 600px;
+                max-height: 600px;
+            }
+
+            #blurOverlay {
+                color: black;
+                background-color: rgba(255, 255, 255, 0.5);
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Коллекция фотографий</h1>
+        <nav id="topNav">
+            <label for="blurRange">Размытие:</label>
+            <input id="blurRange" type="range" max="10" value="0" style="width: 80px;">
+        </nav>
+        <script type="text/javascript">
+            BlurringControl.enable();
+
+            const updateBlurOverlay = function () {
+                document.querySelector("#blurOverlay").hidden = !BlurringControl.overlayOn || topNav.getBoundingClientRect().bottom > 0;
+            };
+
+            BlurringControl.overlayChangeCallback = updateBlurOverlay;
+
+            window.addEventListener("scroll", e => {
+                if (document.querySelector("#blurOverlay"))
+                    updateBlurOverlay();
+            });
+
+            const images = [
+                "https://wp-s.ru/wallpapers/10/13/535228233983431/gornye-snezhnye-vershiny-ryadom-s-ushhelem.jpg",
+                "https://s1.1zoom.ru/big3/662/Underwater_world_Corals_Fish_529249_3000x2000.jpg",
+                "https://images.wallpaperscraft.ru/image/single/gory_pejzazh_mt_rainier_90605_2048x1152.jpg",
+                "https://wallbox.ru/resize/1440x900/wallpapers/main/201525/3f71227a0692339.jpg",
+                "https://altaitg.ru/upload/iblock/1f6/1f6ed816ddc890cfbf62c505f5c0d3af.jpg",
+                "https://vsegda-pomnim.com/uploads/posts/2022-04/1650920733_13-vsegda-pomnim-com-p-gori-dlya-detei-foto-15.jpg",
+                "https://travelpoisk.ru/data/wikitravel/3115/kucherlinskoe-ozero.jpg"];
+
+            for (let image of images)
+                document.write(`
+                    <div class="thumb">
+                        <a href="${image}" target="blank">
+                            <img src="${image}">
+                        </a>
+                    </div>`);
+        </script>
+    </body>
+</html>
